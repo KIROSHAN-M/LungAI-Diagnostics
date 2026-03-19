@@ -1,1 +1,4 @@
 project_id = "yuohghgcyskvjajnsdud"
+
+[functions.analyze-xray]
+verify_jwt = false
