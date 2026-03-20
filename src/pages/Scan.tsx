@@ -137,6 +137,7 @@ const Scan = () => {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 };

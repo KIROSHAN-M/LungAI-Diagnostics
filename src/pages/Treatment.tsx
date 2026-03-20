@@ -205,6 +205,7 @@ const Treatment = () => {
           <RotateCcw className="w-5 h-5 mr-2" /> Start New Patient Scan
         </Button>
       </main>
+      </div>
     </div>
   );
 };

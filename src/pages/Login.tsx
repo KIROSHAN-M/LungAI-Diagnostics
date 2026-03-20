@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import bgLogin from "@/assets/bg-login.jpg";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -52,9 +53,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-hospital bg-grid flex">
+    <div className="min-h-screen flex relative">
+      {/* Full background image */}
+      <div className="absolute inset-0 z-0">
+        <img src={bgLogin} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
+      </div>
+
       {/* Left — Branding panel */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center p-12" style={{ backgroundImage: "var(--gradient-primary)" }}>
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center p-12 z-10" style={{ backgroundImage: "var(--gradient-primary)" }}>
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-white/20 blur-3xl" />
           <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
@@ -86,8 +93,8 @@ const Login = () => {
       </div>
 
       {/* Right — Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md space-y-8">
+      <div className="flex-1 flex items-center justify-center p-6 lg:p-12 z-10">
+        <div className="w-full max-w-md space-y-8 bg-card/90 backdrop-blur-md rounded-3xl p-8 border border-border shadow-xl">
           {/* Mobile logo */}
           <div className="flex items-center gap-3 lg:hidden">
             <div className="p-2.5 rounded-xl bg-primary/10">
@@ -115,7 +122,7 @@ const Login = () => {
                   placeholder="doctor@hospital.org"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 h-12 bg-card border-border rounded-xl"
+                  className="pl-10 h-12 bg-background border-border rounded-xl"
                 />
               </div>
             </div>
@@ -129,7 +136,7 @@ const Login = () => {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 pr-10 h-12 bg-card border-border rounded-xl"
+                  className="pl-10 pr-10 h-12 bg-background border-border rounded-xl"
                 />
                 <button
                   type="button"
@@ -156,14 +163,14 @@ const Login = () => {
               <div className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-background px-3 text-muted-foreground">or continue with</span>
+              <span className="bg-card px-3 text-muted-foreground">or continue with</span>
             </div>
           </div>
 
           <Button
             variant="outline"
             onClick={handleGoogleSignIn}
-            className="w-full h-12 text-base font-medium bg-card rounded-xl"
+            className="w-full h-12 text-base font-medium bg-background rounded-xl"
           >
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
               <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />

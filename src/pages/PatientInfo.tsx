@@ -195,6 +195,7 @@ const PatientInfo = () => {
           </Button>
         </div>
       </main>
+      </div>
     </div>
   );
 };
