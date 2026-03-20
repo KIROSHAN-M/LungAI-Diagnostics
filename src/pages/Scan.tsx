@@ -6,6 +6,7 @@ import XrayUpload from "@/components/XrayUpload";
 import AnalysisResults, { AnalysisData } from "@/components/AnalysisResults";
 import SampleXrays from "@/components/SampleXrays";
 import { Button } from "@/components/ui/button";
+import bgScan from "@/assets/bg-scan.jpg";
 
 const Scan = () => {
   const navigate = useNavigate();
@@ -55,7 +56,12 @@ const Scan = () => {
   };
 
   return (
-    <div className="min-h-screen bg-hospital bg-grid">
+    <div className="min-h-screen relative">
+      <div className="absolute inset-0 z-0">
+        <img src={bgScan} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]" />
+      </div>
+      <div className="relative z-10">
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
           <div className="p-2 rounded-xl bg-primary/10">
@@ -131,6 +137,7 @@ const Scan = () => {
           </div>
         </div>
       </main>
+      </div>
     </div>
   );
 };

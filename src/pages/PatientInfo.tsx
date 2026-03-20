@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import bgPatient from "@/assets/bg-patient.jpg";
 
 interface PatientData {
   fullName: string;
@@ -87,7 +88,12 @@ const PatientInfo = () => {
   );
 
   return (
-    <div className="min-h-screen bg-hospital bg-grid">
+    <div className="min-h-screen relative">
+      <div className="absolute inset-0 z-0">
+        <img src={bgPatient} alt="" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]" />
+      </div>
+      <div className="relative z-10">
       {/* Top bar */}
       <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -189,6 +195,7 @@ const PatientInfo = () => {
           </Button>
         </div>
       </main>
+      </div>
     </div>
   );
 };
