@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, HeartPulse, ArrowRight } from "lucide-react";
+import { User, HeartPulse, ArrowRight, Stethoscope } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -58,7 +58,6 @@ const PatientInfo = () => {
 
   const proceed = () => {
     if (!validate()) return;
-    // Store patient data for use in analysis
     sessionStorage.setItem("patientData", JSON.stringify(data));
     navigate("/scan");
   };
@@ -67,16 +66,16 @@ const PatientInfo = () => {
     label, options, value, onChange,
   }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) => (
     <div className="space-y-2">
-      <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{label}</Label>
+      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">{label}</Label>
       <div className="flex flex-wrap gap-2">
         {options.map((opt) => (
           <button
             key={opt}
             type="button"
             onClick={() => onChange(opt)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${
               value === opt
-                ? "bg-primary text-primary-foreground"
+                ? "bg-primary text-primary-foreground shadow-md"
                 : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
@@ -88,54 +87,58 @@ const PatientInfo = () => {
   );
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-5xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-2">
-          <div>
-            <p className="text-xs font-semibold text-primary uppercase tracking-wider">Step 1 of 3</p>
-            <h1 className="text-2xl font-bold text-foreground">Patient Information</h1>
+    <div className="min-h-screen bg-hospital bg-grid">
+      {/* Top bar */}
+      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-primary/10">
+            <Stethoscope className="w-5 h-5 text-primary" />
           </div>
-          <div className="text-right">
-            <span className="text-primary font-bold">0%</span>
+          <div>
+            <h1 className="text-lg font-bold text-foreground tracking-tight">LungAI Diagnostics</h1>
+            <p className="text-xs text-muted-foreground">Step 1 of 3 — Patient Information</p>
+          </div>
+          <div className="ml-auto text-right">
+            <span className="text-primary font-bold text-sm">33%</span>
             <p className="text-xs text-muted-foreground">Complete</p>
           </div>
         </div>
-        <div className="w-full h-1.5 bg-muted rounded-full mb-8">
-          <div className="h-full w-[33%] rounded-full" style={{ backgroundImage: "var(--gradient-primary)" }} />
+        <div className="w-full h-1 bg-muted">
+          <div className="h-full w-[33%] transition-all" style={{ backgroundImage: "var(--gradient-primary)" }} />
         </div>
+      </header>
 
-        {/* Cards */}
+      <main className="container max-w-5xl mx-auto px-4 py-8">
         <div className="grid md:grid-cols-2 gap-6">
           {/* Basic Info */}
-          <div className="card-elevated rounded-xl p-6 space-y-5 border border-border">
+          <div className="card-elevated rounded-2xl p-6 space-y-5 border border-border">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-primary/10">
+              <div className="p-2 rounded-xl bg-primary/10">
                 <User className="w-5 h-5 text-primary" />
               </div>
-              <h2 className="font-semibold text-foreground">Basic Information</h2>
+              <h2 className="font-bold text-foreground">Basic Information</h2>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Full Name</Label>
-              <Input placeholder="John Doe" value={data.fullName} onChange={(e) => update("fullName", e.target.value)} className="bg-background" />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Full Name</Label>
+              <Input placeholder="John Doe" value={data.fullName} onChange={(e) => update("fullName", e.target.value)} className="bg-background rounded-xl h-11" />
               {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Age</Label>
-                <Input type="number" placeholder="45" value={data.age} onChange={(e) => update("age", e.target.value)} className="bg-background" />
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Age</Label>
+                <Input type="number" placeholder="45" value={data.age} onChange={(e) => update("age", e.target.value)} className="bg-background rounded-xl h-11" />
                 {errors.age && <p className="text-xs text-destructive">{errors.age}</p>}
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Height (cm)</Label>
-                <Input type="number" placeholder="170" value={data.height} onChange={(e) => update("height", e.target.value)} className="bg-background" />
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Height (cm)</Label>
+                <Input type="number" placeholder="170" value={data.height} onChange={(e) => update("height", e.target.value)} className="bg-background rounded-xl h-11" />
                 {errors.height && <p className="text-xs text-destructive">{errors.height}</p>}
               </div>
               <div className="space-y-2">
-                <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Weight (kg)</Label>
-                <Input type="number" placeholder="70" value={data.weight} onChange={(e) => update("weight", e.target.value)} className="bg-background" />
+                <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Weight (kg)</Label>
+                <Input type="number" placeholder="70" value={data.weight} onChange={(e) => update("weight", e.target.value)} className="bg-background rounded-xl h-11" />
                 {errors.weight && <p className="text-xs text-destructive">{errors.weight}</p>}
               </div>
             </div>
@@ -144,29 +147,29 @@ const PatientInfo = () => {
             {errors.gender && <p className="text-xs text-destructive">{errors.gender}</p>}
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Blood Pressure</Label>
-              <Input placeholder="120/80 mmHg" value={data.bloodPressure} onChange={(e) => update("bloodPressure", e.target.value)} className="bg-background" />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Blood Pressure</Label>
+              <Input placeholder="120/80 mmHg" value={data.bloodPressure} onChange={(e) => update("bloodPressure", e.target.value)} className="bg-background rounded-xl h-11" />
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Current Problem</Label>
-              <Input placeholder="Persistent cough, chest pain..." value={data.currentProblem} onChange={(e) => update("currentProblem", e.target.value)} className="bg-background" />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Current Problem</Label>
+              <Input placeholder="Persistent cough, chest pain..." value={data.currentProblem} onChange={(e) => update("currentProblem", e.target.value)} className="bg-background rounded-xl h-11" />
               {errors.currentProblem && <p className="text-xs text-destructive">{errors.currentProblem}</p>}
             </div>
           </div>
 
           {/* Clinical History */}
-          <div className="card-elevated rounded-xl p-6 space-y-5 border border-border">
+          <div className="card-elevated rounded-2xl p-6 space-y-5 border border-border">
             <div className="flex items-center gap-2">
-              <div className="p-2 rounded-lg bg-accent/10">
+              <div className="p-2 rounded-xl bg-accent/10">
                 <HeartPulse className="w-5 h-5 text-accent" />
               </div>
-              <h2 className="font-semibold text-foreground">Clinical History</h2>
+              <h2 className="font-bold text-foreground">Clinical History</h2>
             </div>
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Symptoms</Label>
-              <Textarea placeholder="Shortness of breath, fever, wheezing, fatigue..." value={data.symptoms} onChange={(e) => update("symptoms", e.target.value)} className="bg-background min-h-[80px]" />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Symptoms</Label>
+              <Textarea placeholder="Shortness of breath, fever, wheezing, fatigue..." value={data.symptoms} onChange={(e) => update("symptoms", e.target.value)} className="bg-background min-h-[80px] rounded-xl" />
             </div>
 
             <ToggleGroup label="Smoking History" options={["Never", "Former", "Current"]} value={data.smokingHistory} onChange={(v) => update("smokingHistory", v)} />
@@ -174,19 +177,18 @@ const PatientInfo = () => {
             <ToggleGroup label="Previous Respiratory Issues" options={["None", "Asthma", "COPD", "Other"]} value={data.previousRespiratory} onChange={(v) => update("previousRespiratory", v)} />
 
             <div className="space-y-2">
-              <Label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Known Allergies</Label>
-              <Textarea placeholder="Penicillin, dust, pollen..." value={data.knownAllergies} onChange={(e) => update("knownAllergies", e.target.value)} className="bg-background min-h-[80px]" />
+              <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Known Allergies</Label>
+              <Textarea placeholder="Penicillin, dust, pollen..." value={data.knownAllergies} onChange={(e) => update("knownAllergies", e.target.value)} className="bg-background min-h-[80px] rounded-xl" />
             </div>
           </div>
         </div>
 
-        {/* Proceed button */}
         <div className="flex justify-end mt-8">
-          <Button onClick={proceed} className="h-12 px-8 text-base font-semibold" style={{ backgroundImage: "var(--gradient-primary)" }}>
+          <Button onClick={proceed} className="h-12 px-8 text-base font-bold rounded-xl" style={{ backgroundImage: "var(--gradient-primary)" }}>
             Proceed to Lung Analysis <ArrowRight className="w-5 h-5 ml-2" />
           </Button>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
