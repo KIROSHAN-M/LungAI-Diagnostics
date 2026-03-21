@@ -4,6 +4,8 @@ import { Pill, Apple, Moon, Stethoscope, Heart, AlertTriangle, RotateCcw } from 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AnalysisData } from "@/components/AnalysisResults";
+import StethoscopeAnimation from "@/components/StethoscopeAnimation";
+import { playClick, playSuccess, playError, playNavigate, playHeartbeat } from "@/hooks/useSoundEffects";
 import bgTreatment from "@/assets/bg-treatment.jpg";
 
 interface TreatmentPlan {
@@ -49,8 +51,10 @@ const Treatment = () => {
       if (!response.ok) throw new Error("Failed to get treatment plan");
       const result = await response.json();
       setPlan(result);
+      playSuccess();
     } catch (error) {
       console.error(error);
+      playError();
       toast.error("Failed to generate treatment plan");
       setPlan({
         medications: [{ name: "Consult your physician", instruction: "Based on diagnosis", frequency: "As prescribed", duration: "As directed" }],
@@ -69,6 +73,8 @@ const Treatment = () => {
     .sort((a, b) => b.confidence - a.confidence)[0];
 
   const startNew = () => {
+    playClick();
+    playNavigate();
     sessionStorage.removeItem("patientData");
     sessionStorage.removeItem("analysisResults");
     navigate("/patient-info");
@@ -77,16 +83,21 @@ const Treatment = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-hospital bg-grid flex items-center justify-center">
-        <div className="text-center space-y-4">
-          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+        <div className="text-center space-y-4 animate-fade-up">
+          <div className="w-16 h-16 mx-auto relative">
+            <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+            <div className="absolute inset-0 rounded-full border-4 border-primary border-t-transparent animate-spin" />
+            <Stethoscope className="w-6 h-6 text-primary absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+          </div>
           <p className="text-muted-foreground font-medium">Generating treatment plan...</p>
+          <p className="text-xs text-muted-foreground font-mono animate-pulse">Processing medical data...</p>
         </div>
       </div>
     );
   }
 
-  const Section = ({ icon: Icon, iconColor, title, children }: { icon: any; iconColor: string; title: string; children: React.ReactNode }) => (
-    <div className="card-elevated rounded-2xl border border-border p-6 space-y-4">
+  const Section = ({ icon: Icon, iconColor, title, children, delay = "0s" }: { icon: any; iconColor: string; title: string; children: React.ReactNode; delay?: string }) => (
+    <div className="card-elevated rounded-2xl border border-border p-6 space-y-4 animate-fade-up" style={{ animationDelay: delay }}>
       <div className="flex items-center gap-3">
         <div className={`p-2.5 rounded-xl ${iconColor}`}>
           <Icon className="w-5 h-5 text-white" />
@@ -98,118 +109,119 @@ const Treatment = () => {
   );
 
   return (
-    <div className="min-h-screen relative">
+    <div className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 z-0">
         <img src={bgTreatment} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]" />
       </div>
+      <StethoscopeAnimation />
       <div className="relative z-10">
-      <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
-        <div className="container max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-primary/10">
-            <Stethoscope className="w-5 h-5 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-lg font-bold text-foreground tracking-tight">LungAI Diagnostics</h1>
-            <p className="text-xs text-muted-foreground">Step 3 of 3 — Treatment Plan</p>
-          </div>
-          <div className="ml-auto text-right">
-            <span className="text-primary font-bold text-sm">100%</span>
-            <p className="text-xs text-muted-foreground">Complete</p>
-          </div>
-        </div>
-        <div className="w-full h-1 bg-muted">
-          <div className="h-full w-full" style={{ backgroundImage: "var(--gradient-primary)" }} />
-        </div>
-      </header>
-
-      <main className="container max-w-4xl mx-auto px-4 py-8 space-y-6">
-        <div>
-          <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Treatment & Care Plan</h2>
-          {topCondition && (
-            <div className="flex items-center gap-2 mt-2">
-              <span className="px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold flex items-center gap-1">
-                <AlertTriangle className="w-3 h-3" /> {topCondition.name}
-              </span>
-              <span className="text-xs text-muted-foreground">
-                · {topCondition.severity} · {topCondition.confidence}% confidence
-              </span>
+        <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
+          <div className="container max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-primary/10 animate-pulse-glow">
+              <Stethoscope className="w-5 h-5 text-primary" />
             </div>
-          )}
-          {!topCondition && (
-            <p className="text-sm text-success font-semibold mt-2">✅ No significant conditions detected — lungs appear normal</p>
-          )}
-        </div>
+            <div>
+              <h1 className="text-lg font-bold text-foreground tracking-tight">LungAI Diagnostics</h1>
+              <p className="text-xs text-muted-foreground">Step 3 of 3 — Treatment Plan</p>
+            </div>
+            <div className="ml-auto text-right">
+              <span className="text-primary font-bold text-sm">100%</span>
+              <p className="text-xs text-muted-foreground">Complete</p>
+            </div>
+          </div>
+          <div className="w-full h-1 bg-muted">
+            <div className="h-full w-full" style={{ backgroundImage: "var(--gradient-primary)" }} />
+          </div>
+        </header>
 
-        {plan && (
-          <>
-            <Section icon={Pill} iconColor="bg-accent" title="Recommended Medications">
-              <div className="space-y-3">
-                {plan.medications.map((med, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-background border border-border">
-                    <div>
-                      <p className="font-bold text-foreground text-sm">{med.name}</p>
-                      <p className="text-xs text-muted-foreground">{med.instruction}</p>
+        <main className="container max-w-4xl mx-auto px-4 py-8 space-y-6">
+          <div className="animate-fade-up">
+            <h2 className="text-2xl font-extrabold text-foreground tracking-tight">Treatment & Care Plan</h2>
+            {topCondition && (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="px-3 py-1 rounded-full bg-destructive/10 text-destructive text-xs font-bold flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" /> {topCondition.name}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  · {topCondition.severity} · {topCondition.confidence}% confidence
+                </span>
+              </div>
+            )}
+            {!topCondition && (
+              <p className="text-sm text-success font-semibold mt-2">✅ No significant conditions detected — lungs appear normal</p>
+            )}
+          </div>
+
+          {plan && (
+            <>
+              <Section icon={Pill} iconColor="bg-accent" title="Recommended Medications" delay="0.1s">
+                <div className="space-y-3">
+                  {plan.medications.map((med, i) => (
+                    <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-background border border-border hover:shadow-md transition-shadow">
+                      <div>
+                        <p className="font-bold text-foreground text-sm">{med.name}</p>
+                        <p className="text-xs text-muted-foreground">{med.instruction}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-accent">{med.frequency}</p>
+                        <p className="text-xs text-muted-foreground">{med.duration}</p>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-xs font-bold text-accent">{med.frequency}</p>
-                      <p className="text-xs text-muted-foreground">{med.duration}</p>
+                  ))}
+                </div>
+              </Section>
+
+              <Section icon={Apple} iconColor="bg-success" title="Diet & Nutrition" delay="0.2s">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {plan.diet.map((item, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm">
+                      <span className="mt-0.5 w-2 h-2 rounded-full bg-accent shrink-0" />
+                      <span className="text-muted-foreground">{item}</span>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </Section>
+                  ))}
+                </div>
+              </Section>
 
-            <Section icon={Apple} iconColor="bg-success" title="Diet & Nutrition">
-              <div className="grid sm:grid-cols-2 gap-3">
-                {plan.diet.map((item, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm">
-                    <span className="mt-0.5 w-2 h-2 rounded-full bg-accent shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </Section>
+              <Section icon={Moon} iconColor="bg-info" title="Sleep & Rest Guidelines" delay="0.3s">
+                <div className="space-y-2">
+                  {plan.sleepRest.map((item, i) => (
+                    <div key={i} className="flex items-start gap-3 p-2.5 rounded-xl bg-background border border-border text-sm">
+                      <span className="text-info font-bold">{i + 1}.</span>
+                      <span className="text-muted-foreground">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </Section>
 
-            <Section icon={Moon} iconColor="bg-info" title="Sleep & Rest Guidelines">
-              <div className="space-y-2">
-                {plan.sleepRest.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 p-2.5 rounded-xl bg-background border border-border text-sm">
-                    <span className="text-info font-bold">{i + 1}.</span>
-                    <span className="text-muted-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </Section>
+              <Section icon={Stethoscope} iconColor="bg-warning" title="Doctor's Recommendations" delay="0.4s">
+                <div className="space-y-2">
+                  {plan.doctorRecommendations.map((item, i) => (
+                    <div key={i} className="flex items-start gap-3 p-2.5 rounded-xl bg-background border border-border text-sm">
+                      <span className="text-warning font-bold">{i + 1}</span>
+                      <span className="text-muted-foreground">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </Section>
 
-            <Section icon={Stethoscope} iconColor="bg-warning" title="Doctor's Recommendations">
-              <div className="space-y-2">
-                {plan.doctorRecommendations.map((item, i) => (
-                  <div key={i} className="flex items-start gap-3 p-2.5 rounded-xl bg-background border border-border text-sm">
-                    <span className="text-warning font-bold">{i + 1}</span>
-                    <span className="text-muted-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </Section>
+              <Section icon={Heart} iconColor="bg-destructive" title="Lifestyle Tips" delay="0.5s">
+                <div className="grid sm:grid-cols-2 gap-3">
+                  {plan.lifestyleTips.map((item, i) => (
+                    <div key={i} className="flex items-start gap-2 text-sm">
+                      <Heart className="w-3.5 h-3.5 text-destructive mt-0.5 shrink-0" />
+                      <span className="text-muted-foreground">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+            </>
+          )}
 
-            <Section icon={Heart} iconColor="bg-destructive" title="Lifestyle Tips">
-              <div className="grid sm:grid-cols-2 gap-3">
-                {plan.lifestyleTips.map((item, i) => (
-                  <div key={i} className="flex items-start gap-2 text-sm">
-                    <Heart className="w-3.5 h-3.5 text-destructive mt-0.5 shrink-0" />
-                    <span className="text-muted-foreground">{item}</span>
-                  </div>
-                ))}
-              </div>
-            </Section>
-          </>
-        )}
-
-        <Button onClick={startNew} className="w-full h-12 text-base font-bold rounded-xl" style={{ backgroundImage: "var(--gradient-primary)" }}>
-          <RotateCcw className="w-5 h-5 mr-2" /> Start New Patient Scan
-        </Button>
-      </main>
+          <Button onClick={startNew} className="w-full h-12 text-base font-bold rounded-xl transition-transform hover:scale-[1.02] active:scale-95" style={{ backgroundImage: "var(--gradient-primary)" }}>
+            <RotateCcw className="w-5 h-5 mr-2" /> Start New Patient Scan
+          </Button>
+        </main>
       </div>
     </div>
   );
