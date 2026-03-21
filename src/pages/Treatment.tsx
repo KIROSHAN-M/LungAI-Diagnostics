@@ -4,7 +4,7 @@ import { Pill, Apple, Moon, Stethoscope, Heart, AlertTriangle, RotateCcw } from 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AnalysisData } from "@/components/AnalysisResults";
-import StethoscopeAnimation from "@/components/StethoscopeAnimation";
+import PageOverlayAnimation from "@/components/PageOverlayAnimation";
 import { playClick, playSuccess, playError, playNavigate, playHeartbeat } from "@/hooks/useSoundEffects";
 import bgTreatment from "@/assets/bg-treatment.jpg";
 
