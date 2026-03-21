@@ -111,7 +111,7 @@ const PatientInfo = () => {
         <img src={bgPatient} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]" />
       </div>
-      <StethoscopeAnimation />
+      <PageOverlayAnimation page="patient" />
       <div className="relative z-10">
         <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
