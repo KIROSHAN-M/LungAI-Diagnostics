@@ -205,6 +205,7 @@ const PatientInfo = () => {
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Known Allergies</Label>
                 <Textarea placeholder="Penicillin, dust, pollen..." value={data.knownAllergies} onChange={(e) => { update("knownAllergies", e.target.value); playType(); }} className="bg-background min-h-[80px] rounded-xl" />
+                {errors.knownAllergies && <p className="text-xs text-destructive">{errors.knownAllergies}</p>}
               </div>
             </div>
           </div>
