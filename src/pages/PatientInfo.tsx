@@ -6,9 +6,25 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import StethoscopeAnimation from "@/components/StethoscopeAnimation";
+import PageOverlayAnimation from "@/components/PageOverlayAnimation";
 import { playClick, playType, playSuccess, playError, playNavigate } from "@/hooks/useSoundEffects";
 import bgPatient from "@/assets/bg-patient.jpg";
+
+// Gibberish detection: checks for too many consonant clusters, no vowels, or random chars
+const isGibberish = (text: string): boolean => {
+  const cleaned = text.trim().toLowerCase();
+  if (cleaned.length < 3) return false;
+  // Check vowel ratio — meaningful English text has ~35%+ vowels
+  const vowels = cleaned.replace(/[^aeiouy]/g, "").length;
+  const letters = cleaned.replace(/[^a-z]/g, "").length;
+  if (letters > 5 && vowels / letters < 0.15) return true;
+  // Check for long consonant clusters (5+ in a row)
+  if (/[^aeiouy\s\d.,;:!?'-]{5,}/i.test(cleaned)) return true;
+  // Check if mostly non-alpha (excluding spaces/punctuation)
+  const alpha = cleaned.replace(/[^a-z\s]/g, "").length;
+  if (cleaned.length > 5 && alpha / cleaned.length < 0.5) return true;
+  return false;
+};
 
 interface PatientData {
   fullName: string; age: string; height: string; weight: string; gender: string;
@@ -33,6 +49,7 @@ const PatientInfo = () => {
   const validate = (): boolean => {
     const errs: typeof errors = {};
     if (!data.fullName.trim()) errs.fullName = "Name is required";
+    else if (isGibberish(data.fullName)) errs.fullName = "Please enter a valid name";
     const age = Number(data.age);
     if (!data.age || isNaN(age) || age < 0 || age > 150) errs.age = "Enter a valid age (0-150)";
     const h = Number(data.height);
@@ -41,6 +58,11 @@ const PatientInfo = () => {
     if (!data.weight || isNaN(w) || w < 1 || w > 500) errs.weight = "Enter valid weight (1-500 kg)";
     if (!data.gender) errs.gender = "Select gender";
     if (!data.currentProblem.trim()) errs.currentProblem = "Describe the problem";
+    else if (isGibberish(data.currentProblem)) errs.currentProblem = "Please enter a meaningful description";
+    if (data.symptoms.trim() && isGibberish(data.symptoms)) errs.symptoms = "Please enter valid symptoms";
+    if (data.bloodPressure.trim() && !/^\d{2,3}\/\d{2,3}/.test(data.bloodPressure.trim()) && isGibberish(data.bloodPressure))
+      errs.bloodPressure = "Enter valid blood pressure (e.g. 120/80 mmHg)";
+    if (data.knownAllergies.trim() && isGibberish(data.knownAllergies)) errs.knownAllergies = "Please enter valid allergy information";
     setErrors(errs);
     if (Object.keys(errs).length > 0) {
       playError();
@@ -89,7 +111,7 @@ const PatientInfo = () => {
         <img src={bgPatient} alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]" />
       </div>
-      <StethoscopeAnimation />
+      <PageOverlayAnimation page="patient" />
       <div className="relative z-10">
         <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="container max-w-6xl mx-auto px-4 py-3 flex items-center gap-3">
@@ -151,6 +173,7 @@ const PatientInfo = () => {
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Blood Pressure</Label>
                 <Input placeholder="120/80 mmHg" value={data.bloodPressure} onChange={(e) => { update("bloodPressure", e.target.value); playType(); }} className="bg-background rounded-xl h-11" />
+                {errors.bloodPressure && <p className="text-xs text-destructive">{errors.bloodPressure}</p>}
               </div>
 
               <div className="space-y-2">
@@ -172,6 +195,7 @@ const PatientInfo = () => {
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Symptoms</Label>
                 <Textarea placeholder="Shortness of breath, fever, wheezing, fatigue..." value={data.symptoms} onChange={(e) => { update("symptoms", e.target.value); playType(); }} className="bg-background min-h-[80px] rounded-xl" />
+                {errors.symptoms && <p className="text-xs text-destructive">{errors.symptoms}</p>}
               </div>
 
               <ToggleGroup label="Smoking History" options={["Never", "Former", "Current"]} value={data.smokingHistory} onChange={(v) => update("smokingHistory", v)} />
@@ -181,6 +205,7 @@ const PatientInfo = () => {
               <div className="space-y-2">
                 <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Known Allergies</Label>
                 <Textarea placeholder="Penicillin, dust, pollen..." value={data.knownAllergies} onChange={(e) => { update("knownAllergies", e.target.value); playType(); }} className="bg-background min-h-[80px] rounded-xl" />
+                {errors.knownAllergies && <p className="text-xs text-destructive">{errors.knownAllergies}</p>}
               </div>
             </div>
           </div>

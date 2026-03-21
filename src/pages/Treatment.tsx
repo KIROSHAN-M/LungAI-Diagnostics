@@ -4,7 +4,7 @@ import { Pill, Apple, Moon, Stethoscope, Heart, AlertTriangle, RotateCcw } from 
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AnalysisData } from "@/components/AnalysisResults";
-import StethoscopeAnimation from "@/components/StethoscopeAnimation";
+import PageOverlayAnimation from "@/components/PageOverlayAnimation";
 import { playClick, playSuccess, playError, playNavigate, playHeartbeat } from "@/hooks/useSoundEffects";
 import bgTreatment from "@/assets/bg-treatment.jpg";
 
@@ -112,9 +112,9 @@ const Treatment = () => {
     <div className="min-h-screen relative overflow-hidden">
       <div className="absolute inset-0 z-0">
         <img src={bgTreatment} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-background/80 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-background/75 backdrop-blur-[1px]" />
       </div>
-      <StethoscopeAnimation />
+      <PageOverlayAnimation page="treatment" />
       <div className="relative z-10">
         <header className="border-b border-border bg-card/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="container max-w-5xl mx-auto px-4 py-3 flex items-center gap-3">

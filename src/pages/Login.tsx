@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import StethoscopeAnimation from "@/components/StethoscopeAnimation";
+import PageOverlayAnimation from "@/components/PageOverlayAnimation";
 import { playClick, playType, playSuccess, playError, playNavigate } from "@/hooks/useSoundEffects";
 import bgLogin from "@/assets/bg-login.jpg";
 
@@ -67,7 +67,7 @@ const Login = () => {
         <div className="absolute inset-0 bg-background/70 backdrop-blur-sm" />
       </div>
 
-      <StethoscopeAnimation />
+      <PageOverlayAnimation page="login" />
 
       {/* Left — Branding */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden items-center justify-center p-12 z-10" style={{ backgroundImage: "var(--gradient-primary)" }}>
