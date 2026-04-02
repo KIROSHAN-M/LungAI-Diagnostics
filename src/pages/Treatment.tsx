@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pill, Apple, Moon, Stethoscope, Heart, AlertTriangle, RotateCcw } from "lucide-react";
+import { Pill, Apple, Moon, Stethoscope, Heart, AlertTriangle, RotateCcw, Mail, Check } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { AnalysisData } from "@/components/AnalysisResults";
 import PageOverlayAnimation from "@/components/PageOverlayAnimation";
 import { playClick, playSuccess, playError, playNavigate, playHeartbeat } from "@/hooks/useSoundEffects";
+import { supabase } from "@/integrations/supabase/client";
 import bgTreatment from "@/assets/bg-treatment.jpg";
 
 interface TreatmentPlan {
@@ -21,6 +22,10 @@ const Treatment = () => {
   const [results, setResults] = useState<AnalysisData | null>(null);
   const [plan, setPlan] = useState<TreatmentPlan | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showEmailPrompt, setShowEmailPrompt] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [sendingEmail, setSendingEmail] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem("analysisResults");
@@ -32,6 +37,12 @@ const Treatment = () => {
     const data: AnalysisData = JSON.parse(stored);
     setResults(data);
     fetchTreatment(data);
+    // Get user email from auth session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user?.email) {
+        setUserEmail(session.user.email);
+      }
+    });
   }, [navigate]);
 
   const fetchTreatment = async (data: AnalysisData) => {
@@ -65,6 +76,52 @@ const Treatment = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSendReport = async () => {
+    if (!userEmail || !results || !plan) return;
+    playClick();
+    setSendingEmail(true);
+    try {
+      const patientData = JSON.parse(sessionStorage.getItem("patientData") || "{}");
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/analyze-xray`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({
+            mode: "send-report",
+            email: userEmail,
+            patientData,
+            analysisResults: results,
+            treatmentPlan: plan,
+          }),
+        }
+      );
+      if (!response.ok) throw new Error("Failed to send report");
+      const result = await response.json();
+      if (result.reportHtml) {
+        // Open report in new window for printing/saving
+        const reportWindow = window.open("", "_blank");
+        if (reportWindow) {
+          reportWindow.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>LungAI Report</title><style>body{margin:0;padding:20px;background:#f5f5f5}@media print{body{background:#fff;padding:0}}</style></head><body>${result.reportHtml}</body></html>`);
+          reportWindow.document.close();
+        }
+      }
+      playSuccess();
+      setEmailSent(true);
+      setShowEmailPrompt(false);
+      toast.success("Report generated! You can print or save it from the new window.");
+    } catch (error) {
+      console.error(error);
+      playError();
+      toast.error("Failed to generate report. Please try again.");
+    } finally {
+      setSendingEmail(false);
     }
   };
 
@@ -155,6 +212,48 @@ const Treatment = () => {
 
           {plan && (
             <>
+              {/* Email report prompt */}
+              {!showEmailPrompt && !emailSent && userEmail && (
+                <div className="card-elevated rounded-2xl border border-primary/30 p-5 flex items-center justify-between animate-fade-up bg-primary/5">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-primary/10">
+                      <Mail className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-foreground text-sm">Want this report sent to your email?</p>
+                      <p className="text-xs text-muted-foreground">{userEmail}</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { playClick(); setShowEmailPrompt(false); setEmailSent(true); }}
+                      className="rounded-lg text-xs"
+                    >
+                      No thanks
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleSendReport()}
+                      disabled={sendingEmail}
+                      className="rounded-lg text-xs"
+                      style={{ backgroundImage: "var(--gradient-primary)" }}
+                    >
+                      {sendingEmail ? "Sending..." : "Yes, send it!"}
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {emailSent && (
+                <div className="card-elevated rounded-2xl border border-success/30 p-4 flex items-center gap-3 animate-fade-up bg-success/5">
+                  <div className="p-2 rounded-xl bg-success/10">
+                    <Check className="w-4 h-4 text-success" />
+                  </div>
+                  <p className="text-sm font-medium text-success">Report generated and opened in a new tab!</p>
+                </div>
+              )}
+
               <Section icon={Pill} iconColor="bg-accent" title="Recommended Medications" delay="0.1s">
                 <div className="space-y-3">
                   {plan.medications.map((med, i) => (
