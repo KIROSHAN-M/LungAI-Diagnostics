@@ -71,22 +71,30 @@ const Login = () => {
   const handleGoogleSignIn = async () => {
     playClick();
     setLoading(true);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-    });
-    if (result.redirected) {
-      return;
-    }
-    if (result.error) {
+    try {
+      const result = await lovable.auth.signInWithOAuth("google", {
+        redirect_uri: window.location.origin,
+      });
+      if (result.error) {
+        playError();
+        toast.error(result.error.message || "Google sign-in failed");
+        setLoading(false);
+        return;
+      }
+      if (result.redirected) {
+        // Browser is redirecting to Google — don't do anything else
+        return;
+      }
+      // Tokens received and session set
+      playSuccess();
+      playNavigate();
+      navigate("/patient-info");
+    } catch (err: any) {
       playError();
-      toast.error(result.error.message || "Google sign-in failed");
+      toast.error(err?.message || "Google sign-in failed. Please try again.");
+    } finally {
       setLoading(false);
-      return;
     }
-    playSuccess();
-    playNavigate();
-    navigate("/patient-info");
-    setLoading(false);
   };
 
   return (
