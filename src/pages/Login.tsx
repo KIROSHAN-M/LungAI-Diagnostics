@@ -65,10 +65,23 @@ const Login = () => {
 
   const handleGoogleSignIn = async () => {
     playClick();
-    const { error } = await lovable.auth.signInWithOAuth("google", {
+    setLoading(true);
+    const result = await lovable.auth.signInWithOAuth("google", {
       redirect_uri: window.location.origin,
     });
-    if (error) { playError(); toast.error("Google sign-in failed"); }
+    if (result.redirected) {
+      return;
+    }
+    if (result.error) {
+      playError();
+      toast.error(result.error.message || "Google sign-in failed");
+      setLoading(false);
+      return;
+    }
+    playSuccess();
+    playNavigate();
+    navigate("/patient-info");
+    setLoading(false);
   };
 
   return (
