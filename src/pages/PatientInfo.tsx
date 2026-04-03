@@ -123,9 +123,19 @@ const PatientInfo = () => {
               <h1 className="text-lg font-bold text-foreground tracking-tight">LungAI Diagnostics</h1>
               <p className="text-xs text-muted-foreground">Step 1 of 3 — Patient Information</p>
             </div>
-            <div className="ml-auto text-right">
-              <span className="text-primary font-bold text-sm">33%</span>
-              <p className="text-xs text-muted-foreground">Complete</p>
+            <div className="ml-auto flex items-center gap-3">
+              <div className="text-right">
+                <span className="text-primary font-bold text-sm">33%</span>
+                <p className="text-xs text-muted-foreground">Complete</p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
+                className="text-muted-foreground hover:text-destructive"
+              >
+                <LogOut className="w-4 h-4 mr-1" /> Logout
+              </Button>
             </div>
           </div>
           <div className="w-full h-1 bg-muted">
