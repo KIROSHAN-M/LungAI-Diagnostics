@@ -220,8 +220,7 @@ const Treatment = () => {
                       <Mail className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <p className="font-bold text-foreground text-sm">Want this report sent to your email?</p>
-                      <p className="text-xs text-muted-foreground">{userEmail}</p>
+                      <p className="font-bold text-foreground text-sm">Want to save this report?</p>
                     </div>
                   </div>
                   <div className="flex gap-2">
