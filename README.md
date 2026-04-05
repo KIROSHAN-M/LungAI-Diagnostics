@@ -149,7 +149,7 @@ If you like this project:
 
 ---
 
-<h3 align="center">💙 Building AI for Healthcare Innovation</h3>
+<h3 align="center">
 
 
 
