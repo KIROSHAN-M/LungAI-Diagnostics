@@ -29,12 +29,34 @@ const Treatment = () => {
 
   const defaultTreatmentPlan: TreatmentPlan = {
     medications: [
-      { name: "Consult your physician", instruction: "Based on diagnosis", frequency: "As prescribed", duration: "As directed" },
+      {
+        name: "Consult your physician",
+        instruction: "Based on diagnosis",
+        frequency: "As prescribed",
+        duration: "As directed",
+      },
     ],
-    diet: ["Warm soups and broths", "Citrus fruits rich in Vitamin C", "Leafy green vegetables", "Ginger and turmeric tea"],
-    sleepRest: ["Get 8-10 hours of sleep", "Elevate head 30-45°", "Keep room humidity 40-60%"],
-    doctorRecommendations: ["Follow-up X-ray in 48-72 hours", "Visit a pulmonologist within 5-7 days", "Get CBC tests immediately"],
-    lifestyleTips: ["Practice deep breathing exercises", "Stay hydrated — 3 liters daily", "Avoid smoking and polluted environments"],
+    diet: [
+      "Warm soups and broths",
+      "Citrus fruits rich in Vitamin C",
+      "Leafy green vegetables",
+      "Ginger and turmeric tea",
+    ],
+    sleepRest: [
+      "Get 8-10 hours of sleep",
+      "Elevate head 30-45°",
+      "Keep room humidity 40-60%",
+    ],
+    doctorRecommendations: [
+      "Follow-up X-ray in 48-72 hours",
+      "Visit a pulmonologist within 5-7 days",
+      "Get CBC tests immediately",
+    ],
+    lifestyleTips: [
+      "Practice deep breathing exercises once acute symptoms begin to subside.",
+      "Avoid environmental irritants such as strong perfumes, smoke, or cold air.",
+      "Ensure all household members are monitored for symptoms of respiratory illness.",
+    ],
   };
 
   useEffect(() => {
