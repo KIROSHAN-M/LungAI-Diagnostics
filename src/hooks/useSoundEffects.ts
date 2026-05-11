@@ -3,7 +3,11 @@ const audioCtx = () => {
   if (!(window as any).__lungAudioCtx) {
     (window as any).__lungAudioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
   }
-  return (window as any).__lungAudioCtx as AudioContext;
+  const ctx = (window as any).__lungAudioCtx as AudioContext;
+  if (ctx.state === "suspended") {
+    ctx.resume().catch(() => {});
+  }
+  return ctx;
 };
 
 const beep = (freq: number, duration: number, type: OscillatorType = "sine", vol = 0.12) => {

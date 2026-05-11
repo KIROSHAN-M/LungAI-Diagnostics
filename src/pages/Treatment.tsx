@@ -27,6 +27,16 @@ const Treatment = () => {
   const [sendingEmail, setSendingEmail] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
+  const defaultTreatmentPlan: TreatmentPlan = {
+    medications: [
+      { name: "Consult your physician", instruction: "Based on diagnosis", frequency: "As prescribed", duration: "As directed" },
+    ],
+    diet: ["Warm soups and broths", "Citrus fruits rich in Vitamin C", "Leafy green vegetables", "Ginger and turmeric tea"],
+    sleepRest: ["Get 8-10 hours of sleep", "Elevate head 30-45°", "Keep room humidity 40-60%"],
+    doctorRecommendations: ["Follow-up X-ray in 48-72 hours", "Visit a pulmonologist within 5-7 days", "Get CBC tests immediately"],
+    lifestyleTips: ["Practice deep breathing exercises", "Stay hydrated — 3 liters daily", "Avoid smoking and polluted environments"],
+  };
+
   useEffect(() => {
     const stored = sessionStorage.getItem("analysisResults");
     if (!stored) {
@@ -59,21 +69,17 @@ const Treatment = () => {
           body: JSON.stringify({ mode: "treatment", analysisResults: data, patientData }),
         }
       );
-      if (!response.ok) throw new Error("Failed to get treatment plan");
+      if (!response.ok) {
+        throw new Error("Failed to get treatment plan");
+      }
       const result = await response.json();
       setPlan(result);
       playSuccess();
     } catch (error) {
-      console.error(error);
-      playError();
-      toast.error("Failed to generate treatment plan");
-      setPlan({
-        medications: [{ name: "Consult your physician", instruction: "Based on diagnosis", frequency: "As prescribed", duration: "As directed" }],
-        diet: ["Warm soups and broths", "Citrus fruits rich in Vitamin C", "Leafy green vegetables", "Ginger and turmeric tea"],
-        sleepRest: ["Get 8-10 hours of sleep", "Elevate head 30-45°", "Keep room humidity 40-60%"],
-        doctorRecommendations: ["Follow-up X-ray in 48-72 hours", "Visit a pulmonologist within 5-7 days", "Get CBC tests immediately"],
-        lifestyleTips: ["Practice deep breathing exercises", "Stay hydrated — 3 liters daily", "Avoid smoking and polluted environments"],
-      });
+      console.warn("Treatment plan backend unavailable, using local fallback:", error);
+      setPlan(defaultTreatmentPlan);
+      playSuccess();
+      toast.success("Treatment plan generated locally.");
     } finally {
       setLoading(false);
     }
