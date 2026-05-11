@@ -243,7 +243,15 @@ const Login = () => {
 
           <p className="text-center text-sm text-muted-foreground">
             {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-            <button onClick={() => { setIsSignUp(!isSignUp); playClick(); }} className="text-primary font-bold hover:underline">
+            <button
+              onClick={() => {
+                setIsSignUp((prev) => !prev);
+                setEmail("");
+                setPassword("");
+                playClick();
+              }}
+              className="text-primary font-bold hover:underline"
+            >
               {isSignUp ? "Sign In" : "Sign Up"}
             </button>
           </p>
