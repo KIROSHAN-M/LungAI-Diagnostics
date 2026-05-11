@@ -56,6 +56,7 @@ const Treatment = () => {
   }, [navigate]);
 
   const fetchTreatment = async (data: AnalysisData) => {
+    playHeartbeat();
     try {
       const patientData = JSON.parse(sessionStorage.getItem("patientData") || "{}");
       const response = await fetch(
