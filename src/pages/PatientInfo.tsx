@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, HeartPulse, ArrowRight, Stethoscope, LogOut } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,7 +130,11 @@ const PatientInfo = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={async () => { await supabase.auth.signOut(); navigate("/"); }}
+                onClick={() => {
+                  localStorage.removeItem("lungai-session");
+                  playClick();
+                  navigate("/");
+                }}
                 className="text-muted-foreground hover:text-destructive"
               >
                 <LogOut className="w-4 h-4 mr-1" /> Logout
