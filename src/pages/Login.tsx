@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Mail, Lock, Eye, EyeOff, Stethoscope, Activity, Shield } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,6 +31,7 @@ const Login = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     playClick();
+    console.log('handleSubmit called');
     if (!email || !password) {
       playError();
       toast.error("Please fill in all fields");
@@ -40,27 +39,16 @@ const Login = () => {
     }
     setLoading(true);
     try {
-      if (isSignUp) {
-        const { error, data } = await supabase.auth.signUp({
-          email, password,
-        });
-        if (error) throw error;
-        playSuccess();
-        if (data.session) {
-          playNavigate();
-          toast.success("Account created successfully!");
-          navigate("/patient-info");
-        } else {
-          toast.success("Check your email to confirm your account!");
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-        playSuccess();
-        playNavigate();
-        navigate("/patient-info");
-      }
+      // Mock authentication for demo purposes
+      console.log('Mock signing in with:', email, password);
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      playSuccess();
+      playNavigate();
+      navigate("/patient-info");
     } catch (error: any) {
+      console.error('Auth error:', error);
       playError();
       toast.error(error.message || "Authentication failed");
     } finally {
@@ -72,20 +60,10 @@ const Login = () => {
     playClick();
     setLoading(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
-      });
-      if (result.error) {
-        playError();
-        toast.error(result.error.message || "Google sign-in failed");
-        setLoading(false);
-        return;
-      }
-      if (result.redirected) {
-        // Browser is redirecting to Google — don't do anything else
-        return;
-      }
-      // Tokens received and session set
+      // Mock Google sign-in for demo purposes
+      console.log('Mock Google sign-in');
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       playSuccess();
       playNavigate();
       navigate("/patient-info");

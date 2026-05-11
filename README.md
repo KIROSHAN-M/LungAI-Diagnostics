@@ -77,7 +77,36 @@
 * 🔥 Heatmap Visualization (Grad-CAM)
 * 📄 Smart Diagnosis Summary
 
-### 🧾 Example Output
+---
+
+## ☁️ Deployment
+
+This app is configured for Netlify deployment using Vite.
+
+* Build command: `npm run build`
+* Publish directory: `dist`
+* Single-page app redirect rule is included in `netlify.toml`
+
+### Notes
+
+If you later enable Supabase authentication, set the following Netlify environment variables:
+
+* `VITE_SUPABASE_URL`
+* `VITE_SUPABASE_PUBLISHABLE_KEY`
+
+### 🧪 Local development
+
+```bash
+npm install
+npm run dev
+```
+
+### ✅ Deploy to Netlify
+
+1. Connect the GitHub repo to Netlify.
+2. Set the build command to `npm run build`.
+3. Set the publish directory to `dist`.
+
 
 ```
 🫁 Disease: Pneumonia
