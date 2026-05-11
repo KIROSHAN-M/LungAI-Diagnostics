@@ -9,6 +9,29 @@ import PageOverlayAnimation from "@/components/PageOverlayAnimation";
 import { playClick, playType, playSuccess, playError, playNavigate } from "@/hooks/useSoundEffects";
 import bgLogin from "@/assets/bg-login.jpg";
 
+const USERS_KEY = "lungai-users";
+const SESSION_KEY = "lungai-session";
+
+const readUsers = () => {
+  try {
+    return JSON.parse(localStorage.getItem(USERS_KEY) ?? "[]") as Array<{ email: string; password: string }>;
+  } catch {
+    return [];
+  }
+};
+
+const writeUsers = (users: Array<{ email: string; password: string }>) => {
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+};
+
+const saveSession = (email: string) => {
+  localStorage.setItem(SESSION_KEY, email);
+};
+
+const getSession = () => localStorage.getItem(SESSION_KEY);
+
+const isValidEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value);
+
 const Login = () => {
   const navigate = useNavigate();
   const [isSignUp, setIsSignUp] = useState(false);
@@ -17,27 +40,71 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const sessionEmail = getSession();
+    if (sessionEmail) {
+      navigate("/patient-info");
+    }
+  }, [navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     playClick();
-    console.log('handleSubmit called');
     if (!email || !password) {
       playError();
       toast.error("Please fill in all fields");
       return;
     }
+
+    if (!isValidEmail(email)) {
+      playError();
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
     setLoading(true);
     try {
-      // Mock authentication for demo purposes
-      console.log('Mock signing in with:', email, password);
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const users = readUsers();
+      const existingUser = users.find((user) => user.email.toLowerCase() === email.toLowerCase());
+
+      if (isSignUp) {
+        if (existingUser) {
+          playError();
+          toast.error("Account already exists. Please sign in instead.");
+          setLoading(false);
+          return;
+        }
+
+        users.push({ email: email.toLowerCase(), password });
+        writeUsers(users);
+        saveSession(email.toLowerCase());
+        playSuccess();
+        toast.success("Account created successfully!");
+        navigate("/patient-info");
+        return;
+      }
+
+      if (!existingUser) {
+        playError();
+        toast.error("No account found. Please sign up first.");
+        setLoading(false);
+        return;
+      }
+
+      if (existingUser.password !== password) {
+        playError();
+        toast.error("Email and password do not match. Please try again.");
+        setLoading(false);
+        return;
+      }
+
+      saveSession(email.toLowerCase());
       playSuccess();
       playNavigate();
       navigate("/patient-info");
     } catch (error: any) {
-      console.error('Auth error:', error);
+      console.error("Auth error:", error);
       playError();
       toast.error(error.message || "Authentication failed");
     } finally {
