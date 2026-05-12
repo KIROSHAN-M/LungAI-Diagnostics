@@ -37,7 +37,11 @@ const Scan = () => {
       { name: "Lung Cancer", confidence: 10, severity: "None", findings: ["No suspicious nodules"] },
     ];
     return {
+      imageValid: true,
+      imageType: "Chest X-ray",
+      imageAssessment: "The image shows a valid chest X-ray with findings consistent with mild pneumonia.",
       conditions,
+      additionalFindings: ["Mild airway wall thickening"],
       overallAssessment: "The X-ray findings are suggestive of mild airway changes with a moderate pneumonia pattern. Clinical correlation is needed.",
       recommendation: "Recommend follow-up with a chest specialist and consider a course of antibiotics and rest.",
     };

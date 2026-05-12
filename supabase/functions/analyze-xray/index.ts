@@ -37,7 +37,11 @@ serve(async (req) => {
       ? `\n\nPatient Context: ${patientData.fullName}, Age ${patientData.age}, ${patientData.gender}, Height ${patientData.height}cm, Weight ${patientData.weight}kg. Current problem: ${patientData.currentProblem}. Symptoms: ${patientData.symptoms}. Smoking: ${patientData.smokingHistory}. Asthma history: ${patientData.asthma}. Previous respiratory: ${patientData.previousRespiratory}.`
       : "";
 
-    const systemPrompt = `You are an expert radiologist AI specialized in chest X-ray analysis. Detect these conditions:
+    const systemPrompt = `You are an expert radiologist AI specialized in chest X-ray analysis. Detect these conditions and any additional abnormalities visible in the image, including pleural effusion, pneumothorax, cardiomegaly, pulmonary edema, atelectasis, or other chest findings.
+
+If the image does not show a chest X-ray or does not contain lungs, return imageValid: false and clearly state that this is not a valid lung image. Do not attempt to diagnose lung disease on a non-lung image.
+
+Detect these conditions:
 
 1. **Pneumonia** - consolidation, air bronchograms, ground-glass opacities, pleural effusions
 2. **Tuberculosis (TB)** - upper lobe cavitations, hilar lymphadenopathy, miliary pattern
@@ -47,6 +51,9 @@ serve(async (req) => {
 
 Respond ONLY with valid JSON:
 {
+  "imageValid": true,
+  "imageType": "Chest X-ray",
+  "imageAssessment": "Brief note about the image quality and whether it shows lungs",
   "conditions": [
     { "name": "Pneumonia", "confidence": 85, "severity": "Moderate", "findings": ["finding1", "finding2"] },
     { "name": "Tuberculosis", "confidence": 10, "severity": "None", "findings": ["finding1"] },
@@ -54,11 +61,12 @@ Respond ONLY with valid JSON:
     { "name": "Asthma", "confidence": 5, "severity": "None", "findings": ["finding1"] },
     { "name": "Lung Cancer", "confidence": 8, "severity": "None", "findings": ["finding1"] }
   ],
+  "additionalFindings": ["Pleural effusion", "Pneumothorax"],
   "overallAssessment": "Brief assessment",
   "recommendation": "Brief recommendation"
 }
 
-Be thorough and clinically accurate. Always include all 5 conditions.${patientContext}`;
+If imageValid is false, set conditions and additionalFindings to empty arrays and provide a clear recommendation to resubmit a proper chest X-ray.${patientContext}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -101,7 +109,17 @@ Be thorough and clinically accurate. Always include all 5 conditions.${patientCo
       return jsonResponse({ error: "Failed to parse results" }, 500);
     }
 
-    return jsonResponse(analysisResult);
+    const normalizedResult = {
+      imageValid: analysisResult.imageValid !== undefined ? analysisResult.imageValid : true,
+      imageType: analysisResult.imageType || "Chest X-ray",
+      imageAssessment: analysisResult.imageAssessment || "Image appears to show a chest X-ray.",
+      conditions: Array.isArray(analysisResult.conditions) ? analysisResult.conditions : [],
+      additionalFindings: Array.isArray(analysisResult.additionalFindings) ? analysisResult.additionalFindings : [],
+      overallAssessment: analysisResult.overallAssessment || "No specific overall assessment provided.",
+      recommendation: analysisResult.recommendation || "No recommendation provided.",
+    };
+
+    return jsonResponse(normalizedResult);
   } catch (e) {
     console.error("analyze-xray error:", e);
     return jsonResponse({ error: e instanceof Error ? e.message : "Unknown error" }, 500);

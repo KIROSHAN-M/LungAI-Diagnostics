@@ -8,7 +8,11 @@ export interface ConditionResult {
 }
 
 export interface AnalysisData {
+  imageValid?: boolean;
+  imageType?: string;
+  imageAssessment?: string;
   conditions: ConditionResult[];
+  additionalFindings?: string[];
   overallAssessment: string;
   recommendation: string;
 }
@@ -43,40 +47,69 @@ const AnalysisResults = ({ data }: { data: AnalysisData }) => {
     <div className="space-y-4">
       <h2 className="text-lg font-semibold text-foreground">Diagnosis Results</h2>
 
-      <div className="space-y-3">
-        {sortedConditions.map((condition) => (
-          <div key={condition.name} className="rounded-lg border border-border card-elevated p-4">
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-2">
-                {getSeverityIcon(condition.severity)}
-                <span className="font-semibold text-foreground">{condition.name}</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span className={`text-sm font-medium ${getSeverityColor(condition.severity)}`}>
-                  {condition.severity}
-                </span>
-                <span className="font-mono text-sm font-bold text-foreground">
-                  {condition.confidence}%
-                </span>
-              </div>
-            </div>
-            <div className="w-full h-2 rounded-full bg-muted overflow-hidden mb-3">
-              <div
-                className={`h-full rounded-full transition-all duration-1000 ${getConfidenceBarColor(condition.confidence)}`}
-                style={{ width: `${condition.confidence}%` }}
-              />
-            </div>
-            <ul className="space-y-1">
-              {condition.findings.map((finding, i) => (
-                <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                  <span className="text-primary mt-1">•</span>
-                  {finding}
-                </li>
-              ))}
-            </ul>
+      {data.imageValid === false && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/10 p-4 space-y-3">
+          <div className="flex items-center gap-2 text-destructive">
+            <XCircle className="w-5 h-5" />
+            <span className="font-semibold">Invalid image detected</span>
           </div>
-        ))}
-      </div>
+          <p className="text-sm text-foreground">{data.imageAssessment || "This image does not appear to be a valid chest X-ray. Please upload a proper lung image."}</p>
+          {data.imageType && (
+            <p className="text-sm text-muted-foreground">Image type detected: <span className="font-medium text-foreground">{data.imageType}</span></p>
+          )}
+        </div>
+      )}
+
+      {data.imageValid !== false && (
+        <div className="space-y-3">
+          {sortedConditions.map((condition) => (
+            <div key={condition.name} className="rounded-lg border border-border card-elevated p-4">
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  {getSeverityIcon(condition.severity)}
+                  <span className="font-semibold text-foreground">{condition.name}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className={`text-sm font-medium ${getSeverityColor(condition.severity)}`}>
+                    {condition.severity}
+                  </span>
+                  <span className="font-mono text-sm font-bold text-foreground">
+                    {condition.confidence}%
+                  </span>
+                </div>
+              </div>
+              <div className="w-full h-2 rounded-full bg-muted overflow-hidden mb-3">
+                <div
+                  className={`h-full rounded-full transition-all duration-1000 ${getConfidenceBarColor(condition.confidence)}`}
+                  style={{ width: `${condition.confidence}%` }}
+                />
+              </div>
+              <ul className="space-y-1">
+                {condition.findings.map((finding, i) => (
+                  <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                    <span className="text-primary mt-1">•</span>
+                    {finding}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {data.imageValid !== false && data.additionalFindings?.length > 0 && (
+        <div className="rounded-lg border border-warning/30 bg-warning/5 p-4 space-y-2">
+          <h3 className="font-semibold text-warning text-sm uppercase tracking-wider">Additional Findings</h3>
+          <ul className="space-y-1">
+            {data.additionalFindings.map((finding, i) => (
+              <li key={i} className="text-sm text-foreground flex items-start gap-2">
+                <span className="text-warning mt-1">•</span>
+                {finding}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="rounded-lg border border-primary/30 bg-primary/5 p-4 space-y-2">
         <h3 className="font-semibold text-primary text-sm uppercase tracking-wider">Assessment</h3>
