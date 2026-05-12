@@ -60,11 +60,17 @@ If the image does not show a chest X-ray or does not contain lungs, return image
 
 Detect these conditions:
 
-1. **Pneumonia** - consolidation, air bronchograms, ground-glass opacities, pleural effusions
-2. **Tuberculosis (TB)** - upper lobe cavitations, hilar lymphadenopathy, miliary pattern
-3. **COVID-19** - bilateral ground-glass opacities, peripheral distribution, crazy paving
-4. **Asthma** - hyperinflation, flattened diaphragm, peribronchial thickening
-5. **Lung Cancer** - masses/nodules, hilar enlargement, mediastinal widening
+1. **Pneumonia** - consolidations, air bronchograms, ground-glass opacities, lobar/segmental infiltrates, pleural effusions
+2. **Tuberculosis** - upper lobe cavitations, tree-in-bud nodularity, hilar lymphadenopathy, miliary nodules, fibrotic bands, volume loss
+3. **COVID-19** - bilateral ground-glass opacities, peripheral distribution, multifocal rounded opacities, crazy paving
+4. **Asthma** - hyperinflation, flattened diaphragm, peribronchial thickening, increased bronchovascular markings
+5. **Lung Cancer** - pulmonary nodules/masses, suspicious focal opacity, hilar enlargement, mediastinal widening
+
+Always report the exact condition name using only these labels: Pneumonia, Tuberculosis, COVID-19, Asthma, Lung Cancer.
+
+Do not use synonyms, abbreviations, or alternate labels. If the image most closely matches Tuberculosis patterns, label it Tuberculosis and do not label it Pneumonia unless both are clearly present.
+
+If the image shows findings characteristic of Tuberculosis (cavitation, upper lobe fibrotic changes, tree-in-bud pattern), the correct label must be Tuberculosis.
 
 Respond ONLY with valid JSON:
 {
@@ -83,8 +89,6 @@ Respond ONLY with valid JSON:
   "recommendation": "Brief recommendation"
 }
 
-Always use the exact condition names: Pneumonia, Tuberculosis, COVID-19, Asthma, Lung Cancer. Do not substitute or invent other labels. If uncertain, assign a lower confidence score instead of choosing the wrong disease name.
-
 If imageValid is false, set conditions and additionalFindings to empty arrays and provide a clear recommendation to resubmit a proper chest X-ray.${patientContext}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -100,7 +104,7 @@ If imageValid is false, set conditions and additionalFindings to empty arrays an
           {
             role: "user",
             content: [
-              { type: "text", text: "Analyze this chest X-ray. Evaluate for all 5 conditions. Return ONLY valid JSON." },
+              { type: "text", text: "Analyze this chest X-ray image with special care to distinguish Tuberculosis from Pneumonia. Return ONLY valid JSON with the exact condition names." },
               { type: "image_url", image_url: { url: imageBase64 } },
             ],
           },
