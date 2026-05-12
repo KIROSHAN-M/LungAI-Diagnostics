@@ -6,6 +6,23 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const normalizeBoolean = (value: unknown, defaultValue = true) => {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return value.trim().toLowerCase() === "true";
+  if (typeof value === "number") return value !== 0;
+  return defaultValue;
+};
+
+const normalizeConditionName = (name: string) => {
+  const key = name.trim().toLowerCase();
+  if (key.includes("tuberc")) return "Tuberculosis";
+  if (key.includes("covid")) return "COVID-19";
+  if (key.includes("pneumonia")) return "Pneumonia";
+  if (key.includes("asthma")) return "Asthma";
+  if (key.includes("cancer") || key.includes("malign") || key.includes("lung cancer")) return "Lung Cancer";
+  return name.trim();
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -66,6 +83,8 @@ Respond ONLY with valid JSON:
   "recommendation": "Brief recommendation"
 }
 
+Always use the exact condition names: Pneumonia, Tuberculosis, COVID-19, Asthma, Lung Cancer. Do not substitute or invent other labels. If uncertain, assign a lower confidence score instead of choosing the wrong disease name.
+
 If imageValid is false, set conditions and additionalFindings to empty arrays and provide a clear recommendation to resubmit a proper chest X-ray.${patientContext}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -109,14 +128,24 @@ If imageValid is false, set conditions and additionalFindings to empty arrays an
       return jsonResponse({ error: "Failed to parse results" }, 500);
     }
 
+    const imageValid = normalizeBoolean(analysisResult.imageValid, true);
+    const normalizedConditions = imageValid && Array.isArray(analysisResult.conditions)
+      ? analysisResult.conditions.map((condition: any) => ({
+          name: normalizeConditionName(condition.name || ""),
+          confidence: Number.isFinite(condition.confidence) ? Math.max(0, Math.min(100, condition.confidence)) : 0,
+          severity: typeof condition.severity === "string" ? condition.severity : "None",
+          findings: Array.isArray(condition.findings) ? condition.findings : [],
+        }))
+      : [];
+
     const normalizedResult = {
-      imageValid: analysisResult.imageValid !== undefined ? analysisResult.imageValid : true,
+      imageValid,
       imageType: analysisResult.imageType || "Chest X-ray",
-      imageAssessment: analysisResult.imageAssessment || "Image appears to show a chest X-ray.",
-      conditions: Array.isArray(analysisResult.conditions) ? analysisResult.conditions : [],
-      additionalFindings: Array.isArray(analysisResult.additionalFindings) ? analysisResult.additionalFindings : [],
-      overallAssessment: analysisResult.overallAssessment || "No specific overall assessment provided.",
-      recommendation: analysisResult.recommendation || "No recommendation provided.",
+      imageAssessment: analysisResult.imageAssessment || (imageValid ? "Image appears to show a chest X-ray." : "This is not a valid chest X-ray image. Please upload a proper lung image."),
+      conditions: normalizedConditions,
+      additionalFindings: imageValid && Array.isArray(analysisResult.additionalFindings) ? analysisResult.additionalFindings : [],
+      overallAssessment: analysisResult.overallAssessment || (imageValid ? "No specific overall assessment provided." : "Please provide a valid chest X-ray image for accurate analysis."),
+      recommendation: analysisResult.recommendation || (imageValid ? "No recommendation provided." : "Upload a proper chest X-ray image and try again."),
     };
 
     return jsonResponse(normalizedResult);
